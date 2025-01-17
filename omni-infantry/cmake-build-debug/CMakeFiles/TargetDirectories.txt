@@ -1,0 +1,3 @@
+C:/Users/liuli/Desktop/wl_gimbal-master/omni-infantry/cmake-build-debug/CMakeFiles/omni-infantry.elf.dir
+C:/Users/liuli/Desktop/wl_gimbal-master/omni-infantry/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/liuli/Desktop/wl_gimbal-master/omni-infantry/cmake-build-debug/CMakeFiles/rebuild_cache.dir
