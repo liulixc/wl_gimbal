@@ -31,8 +31,6 @@ static void chassis_set_mode(chassis_t* chassis);
 
 static void chassis_ctrl_info_get();
 
-//static void chassis_spin_handle();
-
 void chassis_device_offline_handle();
 
 static void chassis_power_stop();
@@ -53,9 +51,7 @@ _Noreturn void chassis_task(void const *pvParameters) {
 
         //设置底盘模式
         chassis_set_mode(&chassis);
-        CAN_cmd_Mode(CAN_1,
-                     CHASSIS_MODE_INFO,
-                     chassis.mode);
+
         //遥控器获取底盘方向矢量
         chassis_ctrl_info_get();
 
@@ -110,8 +106,14 @@ static void chassis_set_mode(chassis_t* chassis){
 //        chassis->mode=CHASSIS_FOLLOW_GIMBAL;
 //    }
 
+    CAN_cmd_Mode(CAN_1,
+                 CHASSIS_MODE_INFO,
+                 chassis->mode);
+
     //UI更新---底盘模式
     ui_robot_status.chassis_mode=chassis->mode;
+
+
 
 }
 
@@ -119,11 +121,6 @@ static void chassis_ctrl_info_get() {
 
 
     chassis.chassis_ctrl_info.v_m_per_s = (float) (rc_ctrl.rc.ch[CHASSIS_VX_CHANNEL]) * RC_TO_VX;
-
-
-    if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]<-600)chassis.chassis_ctrl_info.height_m=MID_L0;
-    else if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]<100&&rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]>-100)chassis.chassis_ctrl_info.height_m=MIN_L0;
-    else if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]>600)chassis.chassis_ctrl_info.height_m=MAX_L0;
 
     VAL_LIMIT(chassis.chassis_ctrl_info.height_m,MIN_L0,MAX_L0);
 
