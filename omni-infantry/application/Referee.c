@@ -207,7 +207,7 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
     int CmdID=0;//数据命令码解析
 
     uint16_t judge_length;
-    Referee.RobotHurt.being_hurt = false;
+//    Referee.RobotHurt.being_hurt = false;
     if(ReadFromUsart==NULL)
         return 0 ;
 
@@ -232,10 +232,10 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
 
                     case Referee_ID_game_result://0x0002 比赛结果   比赛结束后发送
                         memcpy(&Referee.GameResult,ReadFromUsart+DATA,Referee_LEN_game_result);
-                        Referee.GameResult.game_over = true;
+//                        Referee.GameResult.game_over = true;
                         break;
 
-                    case Referee_ID_game_robot_HP://0x0003 机器人状态HP   1HZ
+                    case Referee_ID_game_robot_hp://0x0003 机器人状态HP   1HZ
                         memcpy(&Referee.GameRobotHP,ReadFromUsart+DATA,Referee_LEN_game_robot_HP);
                         break;
 
@@ -250,10 +250,6 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
 
                     case Referee_ID_event_data://0x0101 场地事件数据      1HZ
                         memcpy(&Referee.EventData,ReadFromUsart+DATA,Referee_LEN_event_data);
-                        break;
-
-                    case Referee_ID_supply_projectile_action://0x0102 场地补给站动作标识数据   动作改变之后发送
-                        memcpy(&Referee.SupplyProjectileAction,ReadFromUsart+DATA,Referee_LEN_supply_projectile_action);
                         break;
 
                     case Referee_ID_supply_warm://0x0104    裁判系统警告数据    己方警告之后发送
@@ -271,24 +267,6 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
 
                     case Referee_ID_power_heat_data://0x0202    实时功率热量数据    50HZ
                         memcpy(&Referee.PowerHeatData,ReadFromUsart+DATA,Referee_LEN_power_heat_data);
-                        //测量功率模型用，为使测量值测量频率和裁判系统回报的功率频率一致
-                        //收集数据
-//                        float tmp1= 0,tmp2 = 0;
-//                        for (int i = 0; i < 4; ++i) {
-////                            float filtercurrent= first_Kalman_Filter(&chassis_filter[i],chassis.motor_chassis[i].motor_measure->given_current);
-//                            tmp1 += chassis.motor_chassis[i].motor_measure->given_current*chassis.motor_chassis[i].motor_measure->given_current;
-//                            tmp2 += chassis.motor_chassis[i].motor_measure->speed_rpm*chassis.motor_chassis[i].motor_measure->given_current;
-//                            //   tmp1+=pow(filtercurrent*20/16384.0,2);
-//                            //  tmp2+=filtercurrent*20/16384.0*chassis.motor_chassis[i].motor_measure->speed_rpm;
-//
-//                        }
-//                        all_current_pingfang = tmp1*20.0/16384*20/16384;//反馈电流值转国际单位/A
-//                        all_rpm_mul_current = tmp2*20.0/16384;
-//                        power_nihe = CHASSIS_POWER_R0*tmp1 + CHASSIS_POWER_K0*tmp2 + CHASSIS_POWER_P0;
-//                        //          power_nihe = 0.000002623f*tmp2 + 0.0000001025f*tmp1 + 3.067f;
-//
-//                        if(power_nihe < 0)
-//                            power_nihe = 0;
                         break;
 
                     case Referee_ID_game_robot_pos://0x0203     机器人位置数据     10HZ
@@ -299,13 +277,9 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
                         memcpy(&Referee.Buff,ReadFromUsart+DATA,Referee_LEN_buff_musk);
                         break;
 
-                    case Referee_ID_aerial_robot_energy://0x0205    空中机器人能量状态数据 10HZ
-                        memcpy(&Referee.AerialRobotEnergy,ReadFromUsart+DATA,Referee_LEN_aerial_robot_energy);
-                        break;
-
                     case Referee_ID_robot_hurt://0x0206     伤害状态数据  伤害发生后发送
                         memcpy(&Referee.RobotHurt,ReadFromUsart+DATA,Referee_LEN_robot_hurt);
-                        Referee.RobotHurt.being_hurt = true;//受击判断
+//                        Referee.RobotHurt.being_hurt = true;//受击判断
                         break;
 
                     case Referee_ID_shoot_data://0x0207     实时射击数据  射击后发送
@@ -324,15 +298,15 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
                         memcpy(&Referee.DartClient,ReadFromUsart+DATA,Referee_LEN_dart_client_directive);
                         break;
 
-                    case Referee_ID_dart_all_robot_position://0x020B
-                        memcpy(&Referee.RobotPosition,ReadFromUsart+DATA,Referee_LEN_dart_all_robot_position);
+                    case Referee_ID_all_robot_position://0x020B
+                        memcpy(&Referee.RobotPosition,ReadFromUsart+DATA,Referee_LEN_all_robot_position);
                         break;
 
                     case Referee_ID_radar_mark://0x020C
                         memcpy(&Referee.RadarMark,ReadFromUsart+DATA,Referee_LEN_radar_mark);
                         break;
 
-                    case Referee_ID_entry_info://0x020D
+                    case Referee_ID_Sentry_info://0x020D
                         memcpy(&Referee.SentryInfo,ReadFromUsart+DATA,Referee_LEN_entry_info);
                         break;
 
@@ -360,7 +334,7 @@ bool_t Referee_read_data(uint8_t *ReadFromUsart)
                         memcpy(&Referee.Custom,ReadFromUsart+DATA,Referee_LEN_robot_custom_client);
                         break;
 
-                    case Referee_ID_robot_entry_info_receive://0x0307
+                    case Referee_ID_robot_sentry_info_receive://0x0307
                         memcpy(&Referee.SentryMapData,ReadFromUsart+DATA,Referee_LEN_robot_entry_info_receive);
                         break;
 

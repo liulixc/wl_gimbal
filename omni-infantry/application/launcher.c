@@ -46,13 +46,11 @@ void launcher_mode_set(){
             KeyBoard.Q.click_flag=0;
             launcher.fire_mode=Fire_OFF;
             laser_off();
-            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_SET);
         }
         else if(KeyBoard.Q.click_flag==0&& (chassis.mode!=CHASSIS_RELAX&&chassis.mode!=CHASSIS_ONLY)){
             KeyBoard.Q.click_flag=1;
             launcher.fire_mode=Fire_ON;
             laser_on();
-            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_RESET);
         }
     }
 
@@ -130,25 +128,34 @@ void launcher_control() {
     }
     else
     {
-        if (launcher.fire_mode == Fire_ON) {
+        if (launcher.fire_mode == Fire_ON)
+        {
             launcher.fire_l.speed = -FIRE_SPEED_30;
             launcher.fire_r.speed = FIRE_SPEED_30;
-            if (launcher.trigger_cmd == SHOOT_CLOSE) {
+            if (launcher.trigger_cmd == SHOOT_CLOSE)
+            {
                 launcher.trigger.speed = 0;
-            } else if (launcher.trigger_cmd == SHOOT_SINGLE) { //收到单发命令
+            }
+            else if (launcher.trigger_cmd == SHOOT_SINGLE)
+            { //收到单发命令
                 launcher.trigger_cmd = SHOOT_ING;//进入正在单发状态
-                if (next_flag) {
+                if (next_flag)
+                {
                     total_ecd_ref = next_goal;
                     next_flag = false;
-                } else {
+                }
+                else
+                {
                     total_ecd_ref = launcher.trigger.motor_measure->total_ecd + DEGREE_45_TO_ENCODER;//单发拨动45
                 }
                 average_add(&bullet_speed_avg, Referee.ShootData.bullet_speed);
-            } else if (launcher.trigger_cmd == SHOOT_ING) { //单发状态
+            }
+            else if (launcher.trigger_cmd == SHOOT_ING)
+            {   //单发状态
                 //判断是否到达目标位置
-                if (KeyBoard.Mouse_l.status != KEY_PRESS) {
+                if (KeyBoard.Mouse_l.status != KEY_PRESS)
+                {
                     launcher.trigger_cmd = SHOOT_CLOSE;
-
                     launcher.trigger.speed = 0;
                 }
             }

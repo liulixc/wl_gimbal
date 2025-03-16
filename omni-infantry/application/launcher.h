@@ -24,7 +24,7 @@
 #define FIRE_L  0
 #define FIRE_R  1
 #define TRIGGER 0
-//#define DEGREE_45_TO_ENCODER 36824.1f
+
 #define DEGREE_45_TO_ENCODER -36934.0f
 //#define FIRE_ON() KeyBoard.Q.click_flag==1
 //#define FIRE_OFF() KeyBoard.Q.click_flag==0
@@ -36,13 +36,13 @@
 
 //摩擦轮转速PID
 #define SHOOT_FIRE_L_PID_KP 30
-#define SHOOT_FIRE_L_PID_KI 0.f
+#define SHOOT_FIRE_L_PID_KI 5.f
 #define SHOOT_FIRE_L_PID_KD 0.f
 #define SHOOT_FIRE_L_PID_MAX_OUT    16000
 #define SHOOT_FIRE_L_PID_MAX_IOUT   5000
 
 #define SHOOT_FIRE_R_PID_KP 30
-#define SHOOT_FIRE_R_PID_KI 0.f
+#define SHOOT_FIRE_R_PID_KI 5.f
 #define SHOOT_FIRE_R_PID_KD 0.f
 #define SHOOT_FIRE_R_PID_MAX_OUT    16000
 #define SHOOT_FIRE_R_PID_MAX_IOUT   5000

@@ -63,15 +63,60 @@ _Noreturn void chassis_task(void const *pvParameters) {
     }
 }
 
+static void chassis_pc_ctrl(){
+
+//    float speed_change=chassis_speed_change();//获取加速度
+
+    float speed_change=0.0005f;
+    //键盘控制下的底盘以斜坡式变化
+    if(KeyBoard.W.status==KEY_PRESS)//键盘前进键按下
+    {
+        chassis.vx_pc+=speed_change;//速度增量
+    }
+    else if(KeyBoard.S.status==KEY_PRESS)
+    {
+        chassis.vx_pc-=speed_change;
+    }
+    else{
+        chassis.vx_pc=0;
+    }
+
+
+    VAL_LIMIT(chassis.chassis_ctrl_info.v_m_per_s,-MAX_CHASSIS_VX_SPEED,MAX_CHASSIS_VX_SPEED);
+
+//    if(chassis.mode==CHASSIS_SPIN)//灯
+//    {
+//        HAL_GPIO_WritePin(LED6_PORT,LED6_PIN,GPIO_PIN_RESET);
+//    } else{
+//        HAL_GPIO_WritePin(LED6_PORT,LED6_PIN,GPIO_PIN_SET);
+//    }
+
+    if(KeyBoard.E.click_flag==1)//
+    {
+        chassis.mode=CHASSIS_SPIN;
+    }
+
+    if(chassis.mode==CHASSIS_SPIN)//灯
+    {
+//        led.mode=SPIN;//无led
+    }
+//    ui_robot_status.chassis_mode=chassis.chassis_ctrl_mode;
+
+//    if(chassis.mode==CHASSIS_CLIMBING)//灯
+//    {
+//        HAL_GPIO_WritePin(LED5_PORT,LED5_PIN,GPIO_PIN_RESET);
+//    } else{
+//        HAL_GPIO_WritePin(LED5_PORT,LED5_PIN,GPIO_PIN_SET);
+//    }
+}
+
 static void chassis_init() {
-
-
     //底盘驱动电机速度环初始化和电机数据结构体获取
     //初始时底盘模式为失能
     chassis.mode = chassis.last_mode = CHASSIS_RELAX;
     chassis.spin_mode=NORMAL_SPIN;
 
-    chassis.chassis_ctrl_info.height_m=0.1f;
+    chassis.chassis_ctrl_info.height_m=0.18f;
 
 }
 
@@ -113,15 +158,15 @@ static void chassis_set_mode(chassis_t* chassis){
     //UI更新---底盘模式
     ui_robot_status.chassis_mode=chassis->mode;
 
-
-
 }
 
 static void chassis_ctrl_info_get() {
 
-
-    chassis.chassis_ctrl_info.v_m_per_s = (float) (rc_ctrl.rc.ch[CHASSIS_VX_CHANNEL]) * RC_TO_VX;
-
+    chassis_pc_ctrl();
+    chassis.chassis_ctrl_info.v_m_per_s = (float) (rc_ctrl.rc.ch[CHASSIS_VX_CHANNEL]) * RC_TO_VX+chassis.vx_pc;
+    if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]<-600)chassis.chassis_ctrl_info.height_m=MIN_L0;
+    else if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]<100&&rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]>-100)chassis.chassis_ctrl_info.height_m=MID_L0;
+    else if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]>600)chassis.chassis_ctrl_info.height_m=MAX_L0;
     VAL_LIMIT(chassis.chassis_ctrl_info.height_m,MIN_L0,MAX_L0);
 
     chassis.chassis_ctrl_info.yaw_angle_rad=gimbal.yaw.relative_angle_get*MOTOR_ANGLE_TO_RAD;
@@ -132,14 +177,11 @@ static void chassis_ctrl_info_get() {
 
 }
 
-
 void chassis_device_offline_handle() {
     if(detect_list[DETECT_REMOTE].status==OFFLINE && detect_list[DETECT_VIDEO_TRANSIMITTER].status==OFFLINE) {
         chassis.mode = CHASSIS_RELAX;//防止出现底盘疯转
     }
 }
-
-
 
 //底盘断电，过检录
 static void chassis_power_stop()

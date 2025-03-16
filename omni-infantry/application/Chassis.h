@@ -52,7 +52,9 @@
 #define chassis_start_buzzer buzzer_on  (31, 19999)
 #define chassis_buzzer_off   buzzer_off()            //buzzer off，关闭蜂鸣器
 
+//#define MAX_CH      ASSIS_VX_SPEED 2.0f
 #define MAX_CHASSIS_VX_SPEED 2.0f
+
 
 #define MAX_CHASSIS_VW_SPEED 4.4f
 #define CHASSIS_SWING_SPEED -5.5f //-10.5f
@@ -65,8 +67,8 @@
 
 
 #define MIN_L0 0.10f
-#define MAX_L0 0.40f
-#define MID_L0 0.25f
+#define MAX_L0 0.35f
+#define MID_L0 0.18f
 
 #define  RC_TO_VX  (MAX_CHASSIS_VX_SPEED/660) //MAX_CHASSIS_VR_SPEED / RC_MAX_VALUE
 #define  RC_TO_L0  (0.000001)
