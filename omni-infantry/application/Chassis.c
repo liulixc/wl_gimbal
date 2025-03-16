@@ -35,6 +35,8 @@ void chassis_device_offline_handle();
 
 static void chassis_power_stop();
 
+static float chassis_speed_change();
+
 uint8_t test2=0;
 /*程序主体*/
 _Noreturn void chassis_task(void const *pvParameters) {
@@ -63,11 +65,79 @@ _Noreturn void chassis_task(void const *pvParameters) {
     }
 }
 
+float chassis_speed_change()
+{
+    float speed_change = 0;
+    if (cap_mode == CAP_MODE_WORK) //开启电容 增加加速度
+    {
+        speed_change = 0.0062f;//最大加速度
+    } else {
+        switch (Referee.GameRobotStat.chassis_power_limit) {//最大限制功率
+            case 40: {
+                speed_change=0.0014f;
+                break;
+            }
+            case 45: {
+                speed_change=0.0018f;
+                break;
+            }
+            case 50: {
+                speed_change=0.0022f;
+                break;
+            }
+            case 55: {
+                speed_change=0.0026f;
+                break;
+            }
+            case 60: {
+                speed_change=0.003f;
+                break;
+            }
+            case 65: {
+                speed_change=0.0034f;
+                break;
+            }
+            case 70: {
+                speed_change=0.0038f;
+                break;
+            }
+            case 75: {
+                speed_change=0.0042f;
+                break;
+            }
+            case 80: {
+                speed_change=0.0046f;
+                break;
+            }
+            case 85: {
+                speed_change=0.0050f;
+                break;
+            }
+            case 90: {
+                speed_change=0.0054f;
+                break;
+            }
+            case 95: {
+                speed_change=0.0058f;
+                break;
+            }
+            case 100: {
+                speed_change=0.0062f;
+                break;
+            }
+            default:{
+                speed_change=0.0014f;
+            }break;
+        }
+    }
+    return speed_change;
+}
+
 static void chassis_pc_ctrl(){
 
-//    float speed_change=chassis_speed_change();//获取加速度
+    float speed_change=chassis_speed_change();//获取加速度
 
-    float speed_change=0.0005f;
+//    float speed_change=0.0005f;
     //键盘控制下的底盘以斜坡式变化
     if(KeyBoard.W.status==KEY_PRESS)//键盘前进键按下
     {
