@@ -1,46 +1,115 @@
 //
-// Created by xhuanc on 2021/11/24.
+// Created by liuli on 25-3-10.
 //
 
+#include <math.h>
 #include "ramp.h"
 
-void ramp_init(ramp_function_source_t *ramp_source_type, fp32 frame_period, fp32 max, fp32 min)
+void ramp_init(ramp_function_source_t *ramp_source_type, fp32 increase, fp32 decrease)
 {
-    ramp_source_type->frame_period = frame_period;
-    ramp_source_type->max_value = max;
-    ramp_source_type->min_value = min;
-    ramp_source_type->input = 0.0f;
+    ramp_source_type->increase_value=increase;//在使用超级电容时可以变得更大一些
+    ramp_source_type->decrease_value=decrease;
+    ramp_source_type->rampFirst=ramp_first_real;
+    ramp_source_type->target = 0.0f;
     ramp_source_type->out = 0.0f;
+    ramp_source_type->last_out=0.0f;
 }
 
-void ramp_calc(ramp_function_source_t *ramp_source_type, fp32 input)
+void ramp_calc(ramp_function_source_t *ramp_source_type, fp32 target)
 {
-    ramp_source_type->input = input;
-    ramp_source_type->out += ramp_source_type->input * ramp_source_type->frame_period;
-
-    if(input>0)
+    if(ramp_source_type->rampFirst==ramp_first_real)
     {
-        if (ramp_source_type->out > input)
-            ramp_source_type->out = input;
-        else if  (ramp_source_type->out < -input)
-            ramp_source_type->out = -input;
+        if ((ramp_source_type->target >= ramp_source_type->now_real && ramp_source_type->now_real>=ramp_source_type->last_out)
+            || ( ramp_source_type->target <= ramp_source_type->now_real && ramp_source_type->now_real<=ramp_source_type->last_out))
+        {
+            ramp_source_type->out=ramp_source_type->now_real;
+        }
+    }
+    ramp_source_type->target = target;
 
+    if (ramp_source_type->last_out > 0.0f)
+    {
+        if (ramp_source_type->target > ramp_source_type->last_out)
+        {
+            // 正值加速
+            if (fabs(ramp_source_type->last_out - ramp_source_type->target) > ramp_source_type->increase_value)
+            {
+                ramp_source_type->out += ramp_source_type->increase_value;
+            }
+            else
+            {
+                ramp_source_type->out = ramp_source_type->target;
+            }
+        }
+        else if (ramp_source_type->target < ramp_source_type->last_out)
+        {
+            // 正值减速
+            if (fabs(ramp_source_type->last_out - ramp_source_type->target) > ramp_source_type->decrease_value)
+            {
+                ramp_source_type->out -= ramp_source_type->decrease_value;
+            }
+            else
+            {
+                ramp_source_type->out = ramp_source_type->target;
+            }
+        }
+    }
+    else if (ramp_source_type->last_out < 0.0f)
+    {
+        if (ramp_source_type->target < ramp_source_type->last_out)
+        {
+            // 负值加速
+            if (fabs(ramp_source_type->last_out - ramp_source_type->target) > ramp_source_type->increase_value)
+            {
+                ramp_source_type->out -= ramp_source_type->increase_value;
+            }
+            else
+            {
+                ramp_source_type->out = ramp_source_type->target;
+            }
+        }
+        else if (ramp_source_type->target > ramp_source_type->last_out)
+        {
+            // 负值减速
+            if (fabs(ramp_source_type->last_out - ramp_source_type->target) > ramp_source_type->decrease_value)
+            {
+                ramp_source_type->out += ramp_source_type->decrease_value;
+            }
+            else
+            {
+                ramp_source_type->out = ramp_source_type->target;
+            }
+        }
     }
     else
     {
-        if (ramp_source_type->out < input)
-            ramp_source_type->out = input;
-        else if  (ramp_source_type->out > -input)
-            ramp_source_type->out = -input;
-
+        if (ramp_source_type->target > ramp_source_type->last_out)
+        {
+            // 0值正加速
+            if (fabs(ramp_source_type->last_out - ramp_source_type->target) > ramp_source_type->increase_value)
+            {
+                ramp_source_type->out += ramp_source_type->increase_value;
+            }
+            else
+            {
+                ramp_source_type->out = ramp_source_type->target;
+            }
+        }
+        else if (ramp_source_type->target < ramp_source_type->last_out)
+        {
+            // 0值负加速
+            if (fabs(ramp_source_type->last_out - ramp_source_type->target) > ramp_source_type->increase_value)
+            {
+                ramp_source_type->out -= ramp_source_type->increase_value;
+            }
+            else
+            {
+                ramp_source_type->out = ramp_source_type->target;
+            }
+        }
     }
 
-    if (ramp_source_type->out > ramp_source_type->max_value)
-    {
-        ramp_source_type->out = ramp_source_type->max_value;
-    }
-    else if (ramp_source_type->out < ramp_source_type->min_value)
-    {
-        ramp_source_type->out = ramp_source_type->min_value;
-    }
+    //善后
+    ramp_source_type->last_out=ramp_source_type->out;
+
 }
