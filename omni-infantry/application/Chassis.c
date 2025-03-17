@@ -35,7 +35,7 @@ void chassis_device_offline_handle();
 
 static void chassis_power_stop();
 
-static float chassis_speed_change();
+static float chassis_speed();
 
 uint8_t test2=0;
 /*程序主体*/
@@ -57,102 +57,102 @@ _Noreturn void chassis_task(void const *pvParameters) {
         //遥控器获取底盘方向矢量
         chassis_ctrl_info_get();
 
-        //遥控断电失能
-        chassis_device_offline_handle();
+
 
         vTaskDelay(1);
 
     }
 }
 
-float chassis_speed_change()
+float chassis_speed()
 {
-    float speed_change = 0;
-    if (cap_mode == CAP_MODE_WORK) //开启电容 增加加速度
+    float speed = 0;
+    if (cap_mode == CAP_MODE_WORK) //开启电容 增加加速度，cap_mode也还没有传，这个通讯有点累赘
     {
-        speed_change = 0.0062f;//最大加速度
+        speed = 0.0062f;//最大速度
     } else {
-        switch (Referee.GameRobotStat.chassis_power_limit) {//最大限制功率
+        switch (chassis_msg.chassis_limit) {//最大限制功率
             case 40: {
-                speed_change=0.0014f;
+                speed=0.0014f;
                 break;
             }
             case 45: {
-                speed_change=0.0018f;
+                speed=0.0018f;
                 break;
             }
             case 50: {
-                speed_change=0.0022f;
+                speed=0.0022f;
                 break;
             }
             case 55: {
-                speed_change=0.0026f;
+                speed=0.0026f;
                 break;
             }
             case 60: {
-                speed_change=0.003f;
+                speed=0.003f;
                 break;
             }
             case 65: {
-                speed_change=0.0034f;
+                speed=0.0034f;
                 break;
             }
             case 70: {
-                speed_change=0.0038f;
+                speed=0.0038f;
                 break;
             }
             case 75: {
-                speed_change=0.0042f;
+                speed=0.0042f;
                 break;
             }
             case 80: {
-                speed_change=0.0046f;
+                speed=0.0046f;
                 break;
             }
             case 85: {
-                speed_change=0.0050f;
+                speed=0.0050f;
                 break;
             }
             case 90: {
-                speed_change=0.0054f;
+                speed=0.0054f;
                 break;
             }
             case 95: {
-                speed_change=0.0058f;
+                speed=0.0058f;
                 break;
             }
             case 100: {
-                speed_change=0.0062f;
+                speed=0.0062f;
                 break;
             }
             default:{
-                speed_change=0.0014f;
+                speed=2.0f;//还没有把power_limit从底盘传过来，先这样用着了
             }break;
         }
     }
-    return speed_change;
+    return speed;
 }
+
 
 static void chassis_pc_ctrl(){
 
-    float speed_change=chassis_speed_change();//获取加速度
+    float speed=chassis_speed();//获取加速度
 
 //    float speed_change=0.0005f;
     //键盘控制下的底盘以斜坡式变化
     if(KeyBoard.W.status==KEY_PRESS)//键盘前进键按下
     {
-        chassis.vx_pc+=speed_change;//速度增量
+        chassis.vx_pc=speed;//速度增量
     }
     else if(KeyBoard.S.status==KEY_PRESS)
     {
-        chassis.vx_pc-=speed_change;
+        chassis.vx_pc=-speed;
     }
     else{
         chassis.vx_pc=0;
     }
 
 
-    VAL_LIMIT(chassis.chassis_ctrl_info.v_m_per_s,-MAX_CHASSIS_VX_SPEED,MAX_CHASSIS_VX_SPEED);
+    VAL_LIMIT(chassis.vx_pc,-MAX_CHASSIS_VX_SPEED,MAX_CHASSIS_VX_SPEED);
 
 //    if(chassis.mode==CHASSIS_SPIN)//灯
 //    {
@@ -214,16 +214,15 @@ static void chassis_set_mode(chassis_t* chassis){
     }
     //底盘断电失能判断
     chassis_power_stop();
-
+    //遥控断电失能
+    chassis_device_offline_handle();
 //    if(control_flag == VT_ONLINE)
 //    {
 //        chassis->last_mode=chassis->mode;
 //        chassis->mode=CHASSIS_FOLLOW_GIMBAL;
 //    }
 
-    CAN_cmd_Mode(CAN_1,
-                 CHASSIS_MODE_INFO,
-                 chassis->mode);
+
 
     //UI更新---底盘模式
     ui_robot_status.chassis_mode=chassis->mode;
@@ -239,6 +238,7 @@ static void chassis_ctrl_info_get() {
     else if (rc_ctrl.rc.ch[CHASSIS_HEIGHT_CHANNEL]>600)chassis.chassis_ctrl_info.height_m=MAX_L0;
     VAL_LIMIT(chassis.chassis_ctrl_info.height_m,MIN_L0,MAX_L0);
 
+    CAN_cmd_Mode(CAN_1,CHASSIS_MODE_INFO,chassis.mode);
     chassis.chassis_ctrl_info.yaw_angle_rad=gimbal.yaw.relative_angle_get*MOTOR_ANGLE_TO_RAD;
     CAN_cmd_angle(CAN_1,CHASSIS_ANGLE_INFO,chassis.chassis_ctrl_info.yaw_angle_rad,0);
     CAN_cmd_speed_height(CAN_1,CHASSIS_SPEED_HEIGHT_INFO,chassis.chassis_ctrl_info.v_m_per_s,chassis.chassis_ctrl_info.height_m);

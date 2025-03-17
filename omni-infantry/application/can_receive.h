@@ -163,6 +163,7 @@ typedef struct
 typedef struct {
     float pitch_angle_rad;
     float yaw_angle_rad;
+    uint16_t chassis_limit;
 }ChassisMsg;//从底盘发过来的数据
 
 ////枚举 结构体

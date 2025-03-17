@@ -30,6 +30,8 @@ typedef  struct
 
 void ramp_init(ramp_function_source_t *ramp_source_type, fp32 increase, fp32 decrease);
 void ramp_calc(ramp_function_source_t *ramp_source_type, fp32 input);
+void set_ramp_increase_decrease(ramp_function_source_t *ramp_source_type, fp32 increase,fp32 decrease);
+
 
 
 
