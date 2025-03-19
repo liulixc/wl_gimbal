@@ -45,7 +45,7 @@ void launcher_mode_set(){
         {
             KeyBoard.Q.click_flag=0;
             launcher.fire_mode=Fire_OFF;
-            laser_off();
+            laser_off();//激光,但是没有用到
         }
         else if(KeyBoard.Q.click_flag==0&& (chassis.mode!=CHASSIS_RELAX&&chassis.mode!=CHASSIS_ONLY)){
             KeyBoard.Q.click_flag=1;

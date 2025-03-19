@@ -10,7 +10,6 @@
 //#include "can_receive.h"
 #include "user_lib.h"
 #include "Atti.h"
-//#include "bsp_laser.h"
 #include "key_board.h"
 #include "Referee.h"
 #include "Detection.h"
@@ -21,9 +20,6 @@
 
 /*      变量      */
 gimbal_t gimbal;
-uint32_t chassis_move_time;
-uint32_t magazine_cover_time;
-bool magazine_cover_is_closed;
 int16_t y_cnt=0;
 
 extern int32_t total_ecd_ref;
@@ -71,7 +67,7 @@ static void gimbal_ctrl_loop_cal();
 static void gimbal_ctrl_loop_cal_auto();
 static void gimbal_angle_update();
 static void gimbal_auto_handle();
-static void pit_offset_get();
+static void pit_offset_get();//用于得到pitch为0时，6020电机的编码值
 static void gimbal_device_offline_handle();
 static void gimbal_turn_back_judge();
 static void gimbal_uiInfo_packet();
@@ -253,8 +249,6 @@ static void gimbal_init(){
     //上电时默认先设置成失能模式，再切换到当前遥控设置模式
     gimbal.last_mode=GIMBAL_RELAX;
 
-    chassis_move_time=0;
-    magazine_cover_time=0;
 
     //yaw轴和pitch轴电机的校准编码值
     gimbal.yaw.motor_measure->offset_ecd=GIMBAL_YAW_OFFSET_ECD;
@@ -747,7 +741,7 @@ static void gimbal_turn_back_judge(){
         gimbal.yaw.absolute_angle_set+=180;
     }
 }
-
+//TODO:这个地方的UI数据传给底盘
 static void gimbal_uiInfo_packet(){
     ui_robot_status.gimbal_mode=gimbal.mode;
     ui_robot_status.fire_mode=launcher.fire_mode;
@@ -763,6 +757,7 @@ static void gimbal_uiInfo_packet(){
 
 }
 
+//需要底盘把数据传上来,不然没有用
 static void gimbal_power_stop(){
     if(Referee.GameRobotStat.power_management_gimbal_output==0)
     {

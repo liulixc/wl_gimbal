@@ -43,7 +43,7 @@
 
 //pitch yaw 初始ecd值
 #define GIMBAL_PITCH_OFFSET_ECD 5745
-#define GIMBAL_YAW_OFFSET_ECD 6824
+#define GIMBAL_YAW_OFFSET_ECD 7506
 
 #define RC_TO_YAW 0.001f
 #define RC_TO_PITCH 0.0008f
